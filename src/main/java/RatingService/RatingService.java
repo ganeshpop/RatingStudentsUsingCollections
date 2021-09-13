@@ -77,12 +77,5 @@ public class RatingService {
         return ((maxScore / occurrence) * points) / 100;
     }
 
-    public static void main(String[] args) {
-        RatingService ratingService = new RatingService();
-        for (StudentRating studentRating : ratingService.getRatingByStudentName("ananth")) {
-            System.out.println(studentRating);
-            System.out.println("--------------------------------------------");
-        }
 
-    }
 }
