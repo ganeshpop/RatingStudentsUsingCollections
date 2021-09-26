@@ -1,4 +1,4 @@
-package RatingDao;
+package dao;
 
 import pojos.Assignment;
 
@@ -56,11 +56,15 @@ public class AssignmentsDao {
         return studentSpecificAssignments;
     }
 
-//    public static void main(String[] args) {
-//        AssignmentsDao assignmentsDao = new AssignmentsDao();
-//        for (Assignment a:assignmentsDao.getAssignmentByStudentName("ananth")) {
-//            System.out.println(a);
-//            System.out.println("------------------------------------");
-//        }
-//    }
+    public List<Assignment> getAssignmentsBySubjectName(String subjectName) {
+        List<Assignment> subjectSpecificAssignments = new ArrayList<>();
+        for (Assignment assignment : assignments.values()) {
+            if (assignment.getSubject().equalsIgnoreCase(subjectName)) {
+                subjectSpecificAssignments.add(assignment);
+            }
+        }
+        return subjectSpecificAssignments;
+    }
+
+
 }
