@@ -49,11 +49,16 @@ public class StudentRating {
 
     @Override
     public String toString() {
-        return "Subject : " + subject +
-                "\nTest Score : " + testScore +
-                "\nquizScore : " + quizScore +
-                "\nlabScore : " + labScore +
-                "\nprojectScore : " + projectScore +
-                "\noverallRating : " + overallRating;
+        String testScoreString = (testScore < 0) ? "N/A" : Double.toString(testScore);
+        String quizScoreString = (quizScore < 0) ? "N/A" : Double.toString(quizScore);
+        String labScoreString = (labScore < 0) ? "N/A" : Double.toString(labScore);
+        String projectScoreString = (projectScore < 0) ? "N/A" : Double.toString(projectScore);
+        String overallRatingString = (overallRating < 0) ? "N/A" : Double.toString(overallRating);
+        return "Subject Name : " + subject +
+                "\nTest Score : " + testScoreString +
+                "\nquizScore : " + quizScoreString +
+                "\nlabScore : " + labScoreString +
+                "\nprojectScore : " + projectScoreString +
+                "\noverallRating : " + overallRatingString;
     }
 }
