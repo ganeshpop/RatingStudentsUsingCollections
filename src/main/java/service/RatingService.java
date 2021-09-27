@@ -2,12 +2,9 @@ package service;
 
 import dao.AssignmentsDao;
 import dao.DistributionsDao;
-import pojos.Assignment;
-import pojos.StudentRating;
-import pojos.SubjectRating;
+import pojos.*;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -17,59 +14,10 @@ public class RatingService {
 
     public List<StudentRating> getRatingByStudentName(String studentName) {
         List<StudentRating> studentRatings = new ArrayList<>();
-        Map<String, List<Assignment>> subjectWithAssignments = new Hashtable<>();
-        for (Assignment assignment : assignmentsDao.getAssignmentsByStudentName(studentName)) {
-            if (!subjectWithAssignments.containsKey(assignment.getSubject())) {
-                ArrayList<Assignment> assignments = new ArrayList<>();
-                assignments.add(assignment);
-                subjectWithAssignments.put(assignment.getSubject(), assignments);
-            } else {
-                subjectWithAssignments.get(assignment.getSubject()).add(assignment);
-            }
-        }
+        Map<String, List<Assignment>> subjectWithAssignments = assignmentsDao.getAssignmentsByStudentName(studentName);
         for (String subject : subjectWithAssignments.keySet()) {
-            List<Assignment> tests = new ArrayList<>();
-            List<Assignment> quizzes = new ArrayList<>();
-            List<Assignment> labs = new ArrayList<>();
-            List<Assignment> projects = new ArrayList<>();
-            for (Assignment assignment : subjectWithAssignments.get(subject)) {
-                switch (assignment.getAssignmentCategory()) {
-                    case "test 1":
-                    case "test 2":
-                        tests.add(assignment);
-                        break;
-                    case "quiz 1":
-                    case "quiz 2":
-                        quizzes.add(assignment);
-                        break;
-                    case "lab 1":
-                        labs.add(assignment);
-                        break;
-                    case "project 1":
-                        projects.add(assignment);
-                        break;
-                }
-            }
-            double testScore = 0, quizScore = 0, labScore = 0, projectScore = 0, overallRating;
-
-            for (Assignment assignment : tests) {
-                testScore += getScore(distributionsDao.getCategory("test"), tests.size(), assignment.getPoints());
-            }
-            for (Assignment assignment : quizzes) {
-                quizScore += getScore(distributionsDao.getCategory("quiz"), quizzes.size(), assignment.getPoints());
-            }
-            for (Assignment assignment : labs) {
-                labScore += getScore(distributionsDao.getCategory("labWork"), labs.size(), assignment.getPoints());
-            }
-            for (Assignment assignment : projects) {
-                projectScore += getScore(distributionsDao.getCategory("project"), projects.size(), assignment.getPoints());
-            }
-            overallRating = (testScore + quizScore + labScore + projectScore);
-            if (tests.size() < 1) testScore = -1;
-            if (quizzes.size() < 1) quizScore = -1;
-            if (labs.size() < 1) labScore = -1;
-            if (projects.size() < 1) projectScore = -1;
-            studentRatings.add(new StudentRating(subject, testScore, quizScore, labScore, projectScore, overallRating));
+            Rating rating = calculateRating(groupAssignments(subjectWithAssignments.get(subject)));
+            studentRatings.add(new StudentRating(subject, rating.getTestScore(), rating.getQuizScore(), rating.getLabScore(), rating.getProjectScore(), rating.getOverallRating()));
         }
         return studentRatings;
     }
@@ -80,67 +28,58 @@ public class RatingService {
 
     public List<SubjectRating> getRatingsBySubjectName(String subjectName) {
         List<SubjectRating> subjectRatings = new ArrayList<>();
-        Map<String, List<Assignment>> studentsWithAssignments = new Hashtable<>();
-        for (Assignment assignment : assignmentsDao.getAssignmentsBySubjectName(subjectName)) {
-            if (!studentsWithAssignments.containsKey(assignment.getStudentName())) {
-                ArrayList<Assignment> assignments = new ArrayList<>();
-                assignments.add(assignment);
-                studentsWithAssignments.put(assignment.getStudentName(), assignments);
-            } else {
-                studentsWithAssignments.get(assignment.getStudentName()).add(assignment);
-            }
-        }
+        Map<String, List<Assignment>> studentsWithAssignments = assignmentsDao.getAssignmentsBySubjectName(subjectName);
         for (String studentName : studentsWithAssignments.keySet()) {
-            List<Assignment> tests = new ArrayList<>();
-            List<Assignment> quizzes = new ArrayList<>();
-            List<Assignment> labs = new ArrayList<>();
-            List<Assignment> projects = new ArrayList<>();
-            for (Assignment assignment : studentsWithAssignments.get(studentName)) {
-                switch (assignment.getAssignmentCategory()) {
-                    case "test 1":
-                    case "test 2":
-                        tests.add(assignment);
-                        break;
-                    case "quiz 1":
-                    case "quiz 2":
-                        quizzes.add(assignment);
-                        break;
-                    case "lab 1":
-                        labs.add(assignment);
-                        break;
-                    case "project 1":
-                        projects.add(assignment);
-                        break;
-                }
-            }
-            double testScore = 0, quizScore = 0, labScore = 0, projectScore = 0, overallRating;
-
-            for (Assignment assignment : tests) {
-                testScore += getScore(distributionsDao.getCategory("test"), tests.size(), assignment.getPoints());
-            }
-            for (Assignment assignment : quizzes) {
-                quizScore += getScore(distributionsDao.getCategory("quiz"), quizzes.size(), assignment.getPoints());
-            }
-            for (Assignment assignment : labs) {
-                labScore += getScore(distributionsDao.getCategory("labWork"), labs.size(), assignment.getPoints());
-            }
-            for (Assignment assignment : projects) {
-                projectScore += getScore(distributionsDao.getCategory("project"), projects.size(), assignment.getPoints());
-            }
-            overallRating = (testScore + quizScore + labScore + projectScore);
-            if (tests.size() < 1) testScore = -1;
-            if (quizzes.size() < 1) quizScore = -1;
-            if (labs.size() < 1) labScore = -1;
-            if (projects.size() < 1) projectScore = -1;
-            subjectRatings.add(new SubjectRating(studentName, testScore, quizScore, labScore, projectScore, overallRating));
+            Rating rating = calculateRating(groupAssignments(studentsWithAssignments.get(studentName)));
+            subjectRatings.add(new SubjectRating(studentName, rating.getTestScore(), rating.getQuizScore(), rating.getLabScore(), rating.getProjectScore(), rating.getOverallRating()));
         }
         return subjectRatings;
     }
 
-    public static void main(String[] args) {
-        RatingService ratingService = new RatingService();
-        ratingService.getRatingsBySubjectName("Electro Fields");
+    private GroupedAssignments groupAssignments(List<Assignment> assignments) {
+        GroupedAssignments groupedAssignments = new GroupedAssignments();
+        for (Assignment assignment : assignments) {
+            switch (assignment.getAssignmentCategory()) {
+                case "test 1":
+                case "test 2":
+                    groupedAssignments.getTests().add(assignment);
+                    break;
+                case "quiz 1":
+                case "quiz 2":
+                    groupedAssignments.getQuizzes().add(assignment);
+                    break;
+                case "lab 1":
+                    groupedAssignments.getLabs().add(assignment);
+                    break;
+                case "project 1":
+                    groupedAssignments.getProjects().add(assignment);
+                    break;
+            }
+        }
+        return groupedAssignments;
     }
 
+    private Rating calculateRating(GroupedAssignments groupedAssignments) {
+        double testScore = 0, quizScore = 0, labScore = 0, projectScore = 0, overallRating;
+
+        for (Assignment assignment : groupedAssignments.getTests()) {
+            testScore += getScore(distributionsDao.getCategory("test"), groupedAssignments.getTests().size(), assignment.getPoints());
+        }
+        for (Assignment assignment : groupedAssignments.getQuizzes()) {
+            quizScore += getScore(distributionsDao.getCategory("quiz"), groupedAssignments.getQuizzes().size(), assignment.getPoints());
+        }
+        for (Assignment assignment : groupedAssignments.getLabs()) {
+            labScore += getScore(distributionsDao.getCategory("labWork"), groupedAssignments.getLabs().size(), assignment.getPoints());
+        }
+        for (Assignment assignment : groupedAssignments.getProjects()) {
+            projectScore += getScore(distributionsDao.getCategory("project"), groupedAssignments.getProjects().size(), assignment.getPoints());
+        }
+        overallRating = (testScore + quizScore + labScore + projectScore);
+        if (groupedAssignments.getTests().size() < 1) testScore = -1;
+        if (groupedAssignments.getQuizzes().size() < 1) quizScore = -1;
+        if (groupedAssignments.getLabs().size() < 1) labScore = -1;
+        if (groupedAssignments.getProjects().size() < 1) projectScore = -1;
+        return new Rating(testScore, quizScore, labScore, projectScore, overallRating);
+    }
 
 }

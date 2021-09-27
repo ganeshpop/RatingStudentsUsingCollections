@@ -17,35 +17,29 @@ public class StudentRating {
         this.overallRating = overallRating;
     }
 
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public void setTestScore(int testScore) {
-        this.testScore = testScore;
-    }
-
-    public void setQuizScore(int quizScore) {
-        this.quizScore = quizScore;
-    }
-
-    public void setLabScore(int labScore) {
-        this.labScore = labScore;
-    }
-
-    public void setProjectScore(int projectScore) {
-        this.projectScore = projectScore;
-    }
-
-    public void setOverallRating(int overallRating) {
-        this.overallRating = overallRating;
-    }
-
     public String getSubject() {
         return subject;
     }
 
+    public double getTestScore() {
+        return testScore;
+    }
+
+    public double getQuizScore() {
+        return quizScore;
+    }
+
+    public double getLabScore() {
+        return labScore;
+    }
+
+    public double getProjectScore() {
+        return projectScore;
+    }
+
+    public double getOverallRating() {
+        return overallRating;
+    }
 
     @Override
     public String toString() {

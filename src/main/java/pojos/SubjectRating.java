@@ -18,28 +18,24 @@ public class SubjectRating {
     }
 
 
-    public void setStudentName(String studentName) {
-        this.studentName = studentName;
+    public double getTestScore() {
+        return testScore;
     }
 
-    public void setTestScore(int testScore) {
-        this.testScore = testScore;
+    public double getQuizScore() {
+        return quizScore;
     }
 
-    public void setQuizScore(int quizScore) {
-        this.quizScore = quizScore;
+    public double getLabScore() {
+        return labScore;
     }
 
-    public void setLabScore(int labScore) {
-        this.labScore = labScore;
+    public double getProjectScore() {
+        return projectScore;
     }
 
-    public void setProjectScore(int projectScore) {
-        this.projectScore = projectScore;
-    }
-
-    public void setOverallRating(int overallRating) {
-        this.overallRating = overallRating;
+    public double getOverallRating() {
+        return overallRating;
     }
 
     public String getStudentName() {

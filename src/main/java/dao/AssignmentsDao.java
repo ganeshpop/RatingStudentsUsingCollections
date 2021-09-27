@@ -3,10 +3,7 @@ package dao;
 import pojos.Assignment;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AssignmentsDao {
     private Map<Integer, Assignment> assignments = new HashMap<>();
@@ -34,33 +31,38 @@ public class AssignmentsDao {
         this.assignments.put(20, new Assignment("Chaya", "Electro Fields", "test 2", LocalDate.of(2016, 8, 1), 92));
     }
 
-    public Map<Integer, Assignment> getAssignments() {
-        return assignments;
+    public boolean addAssignment(Assignment assignment) {
+        this.assignments.put(assignments.size() + 1,assignment);
+        return true;
     }
 
-    public void setAssignments(Map<Integer, Assignment> assignments) {
-        this.assignments = assignments;
-    }
-
-    public Assignment getAssignment(int serialNo) {
-        return assignments.get(serialNo);
-    }
-
-    public List<Assignment> getAssignmentsByStudentName(String studentName) {
-        List<Assignment> studentSpecificAssignments = new ArrayList<>();
+    public Map<String, List<Assignment>> getAssignmentsByStudentName(String studentName) {
+        Map<String, List<Assignment>> studentSpecificAssignments = new Hashtable<>();
         for (Assignment assignment : assignments.values()) {
-            if (assignment.getStudentName().equalsIgnoreCase(studentName)) {
-                studentSpecificAssignments.add(assignment);
+            if (assignment.getStudentName().equalsIgnoreCase(studentName.trim())) {
+                if (!studentSpecificAssignments.containsKey(assignment.getSubject())) {
+                    ArrayList<Assignment> assignments = new ArrayList<>();
+                    assignments.add(assignment);
+                    studentSpecificAssignments.put(assignment.getSubject(), assignments);
+                } else {
+                    studentSpecificAssignments.get(assignment.getSubject()).add(assignment);
+                }
             }
         }
         return studentSpecificAssignments;
     }
 
-    public List<Assignment> getAssignmentsBySubjectName(String subjectName) {
-        List<Assignment> subjectSpecificAssignments = new ArrayList<>();
+    public Map<String, List<Assignment>> getAssignmentsBySubjectName(String subjectName) {
+        Map<String, List<Assignment>> subjectSpecificAssignments = new Hashtable<>();
         for (Assignment assignment : assignments.values()) {
-            if (assignment.getSubject().equalsIgnoreCase(subjectName)) {
-                subjectSpecificAssignments.add(assignment);
+            if (assignment.getSubject().equalsIgnoreCase(subjectName.trim())) {
+                if (!subjectSpecificAssignments.containsKey(assignment.getStudentName())) {
+                    ArrayList<Assignment> assignments = new ArrayList<>();
+                    assignments.add(assignment);
+                    subjectSpecificAssignments.put(assignment.getStudentName(), assignments);
+                } else {
+                    subjectSpecificAssignments.get(assignment.getStudentName()).add(assignment);
+                }
             }
         }
         return subjectSpecificAssignments;
